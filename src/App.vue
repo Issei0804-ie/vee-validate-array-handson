@@ -1,47 +1,43 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { useFieldArray, useForm } from 'vee-validate'
+import * as yup from 'yup'
+
+const { errors } = useForm({
+  validationSchema: yup.object({
+    objects: yup.array().of(
+      yup.object({
+        name: yup.string().required(),
+        description: yup.string().required()
+      })
+    )
+  }),
+  initialValues: {
+    objects: [{ name: '', description: '' }]
+  }
+})
+
+const { fields, push } = useFieldArray<{ name: string; description: string }>('objects')
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div>
+    <form>
+      <div v-for="(field, index) in fields" :key="field.key">
+        <div class="name">
+          <input v-model="field.value.name" />
+          <span class="show-error"> {{ errors[`objects[${index}].name`] }}</span>
+          <span class="not-show-error"> {{ errors[`objects.${index}.name`] }}</span>
+        </div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+        <div class="description">
+          <input v-model="field.value.description" />
+          <span class="show-error"> {{ errors[`objects[${index}].description`] }}</span>
+          <span class="not-show-error"> {{ errors[`objects.${index}.description`] }}</span>
+        </div>
+      </div>
+      <button type="button" @click="push({ name: '', description: '' })">
+        Click to Push object
+      </button>
+    </form>
+  </div>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
